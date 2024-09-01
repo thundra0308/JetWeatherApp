@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -77,6 +76,7 @@ import com.example.jetweatherapp.viewmodels.MainScreenViewModel
 import com.example.jetweatherapp.viewmodels.PermissionViewModel
 import com.example.jetweatherapp.widgets.TemperatureText
 import com.example.jetweatherapp.widgets.WormIndicator
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
@@ -112,14 +112,18 @@ fun MainScreen(
     // Side Effects
     LaunchedEffect(key1 = currentLocation) {
         if (currentLocation != null) {
-            mainScreenViewModel.getCurrentWeather(
-                currentLocation.latitude,
-                currentLocation.longitude
-            )
-            mainScreenViewModel.get5Day3HourWeatherForecast(
-                currentLocation.latitude,
-                currentLocation.longitude
-            )
+            async {
+                mainScreenViewModel.getCurrentWeather(
+                    currentLocation.latitude,
+                    currentLocation.longitude
+                )
+            }.await()
+            async {
+                mainScreenViewModel.get5Day3HourWeatherForecast(
+                    currentLocation.latitude,
+                    currentLocation.longitude
+                )
+            }.await()
         }
     }
 
@@ -128,20 +132,21 @@ fun MainScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ConstraintLayout(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
             if (currentWeather.loading == true || forecast.loading == true) {
-                val (cpiMain) = createRefs()
-                CircularProgressIndicator(
-                    modifier = Modifier.constrainAs(cpiMain) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             } else if (currentWeather.exception != null || forecast.exception != null) {
                 Snackbar {
                     Column {
@@ -150,16 +155,11 @@ fun MainScreen(
                     }
                 }
             } else {
-                val (colTop, colMain) = createRefs()
                 Column(
                     modifier = Modifier
-                        .constrainAs(colTop) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
                         .fillMaxWidth()
                         .wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
                         shadowElevation = elevation
@@ -194,14 +194,10 @@ fun MainScreen(
                 }
                 Column(
                     modifier = Modifier
-                        .constrainAs(colMain) {
-                            top.linkTo(colTop.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
+                        .fillMaxWidth()
                         .padding(start = 25.dp, end = 25.dp)
-                        .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.Top,
+                        .verticalScroll(scrollState)
+                        .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     currentWeather.data?.let {
@@ -211,15 +207,6 @@ fun MainScreen(
                                 forecastData = it1
                             )
                         }
-                    }
-                    repeat(10) { index ->
-                        Text(
-                            text = "Item $index",
-                            fontSize = 24.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        )
                     }
                 }
             }
@@ -368,7 +355,7 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
         ConstraintLayout(
             modifier = Modifier.fillMaxSize(),
         ) {
-            val (hzpager,wormi) = createRefs()
+            val (hzpager, wormi) = createRefs()
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.constrainAs(hzpager) {
@@ -394,6 +381,7 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
             )
         }
     }
+    Spacer(modifier = Modifier.height(20.dp))
 }
 
 @Composable
@@ -450,9 +438,9 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
 
     LaunchedEffect(locationViewModel.currentLocation.value) {
         if (!dialogQueue.containsAll(permissionsToRequest.toList())) {
-            locationViewModel.startLocationUpdates()
+            async { locationViewModel.startLocationUpdates() }.await()
         } else {
-            locationViewModel.stopLocationUpdates()
+            async { locationViewModel.stopLocationUpdates() }.await()
         }
         Log.d(
             "LOCATION_TAG",

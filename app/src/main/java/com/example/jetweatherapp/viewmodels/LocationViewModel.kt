@@ -16,7 +16,9 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,8 +30,8 @@ class LocationViewModel @Inject constructor(@ApplicationContext private val cont
     fun startLocationUpdates() {
         viewModelScope.launch {
             val locationRequest = LocationRequest.create().apply {
-                interval = 60000 // Update location every 10 seconds
-                fastestInterval = 30000
+                interval = 300000 // Update location every 10 seconds
+                fastestInterval = 150000
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
             locationCallback = object : LocationCallback() {
