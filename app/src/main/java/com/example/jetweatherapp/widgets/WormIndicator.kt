@@ -73,7 +73,7 @@ fun WormIndicator(
             repeat(count) {
                 Box(
                     modifier = Modifier
-                        .size(10.dp)
+                        .size(7.dp)
                         .background(
                             color = Color.White,
                             shape = CircleShape
@@ -85,7 +85,7 @@ fun WormIndicator(
         Box(
             Modifier
                 .wormTransition(pagerState, spacing)
-                .size(10.dp)
+                .size(7.dp)
         )
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,19 +37,21 @@ fun UpcomingForecast(
     temperature: String = "18°"
 ) {
     Column(
-        verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .height(80.dp),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val painter = rememberAsyncImagePainter("https://openweathermap.org/img/wn/$iconId.png")
-        Text(modifier = Modifier.padding(top = 10.dp), text = time, style = TextStyle(fontSize = 14.sp))
-        Spacer(modifier = Modifier.height(5.dp))
+        Text(modifier = Modifier.padding(top = 0.dp), text = time, style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.SemiBold))
+        Spacer(modifier = Modifier.height(2.dp))
         Image(
             painter = painter,
             contentDescription = "Loaded Image",
             modifier = Modifier.size(40.dp),
             contentScale = ContentScale.Fit
         )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(modifier = Modifier.padding(bottom = 7.5.dp), text = temperature, style = TextStyle(fontSize = 18.sp))
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(modifier = Modifier.padding(bottom = 0.dp), text = "$temperature°", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold))
     }
 }

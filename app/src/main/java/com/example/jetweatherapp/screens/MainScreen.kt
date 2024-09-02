@@ -4,45 +4,30 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
@@ -55,6 +40,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -64,21 +51,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.example.jetweatherapp.R
+import com.example.jetweatherapp.components.ForecastCard
+import com.example.jetweatherapp.components.HorizontalForecastListOf24Hours
 import com.example.jetweatherapp.components.LocationPermissionTextProvider
 import com.example.jetweatherapp.components.PermissionDialog
-import com.example.jetweatherapp.components.UpcomingForecast
+import com.example.jetweatherapp.components.WeatherExpandView
+import com.example.jetweatherapp.components.WeatherGrid
+import com.example.jetweatherapp.components.WeatherViewPager
 import com.example.jetweatherapp.model.CurrentWeather
 import com.example.jetweatherapp.model.WeatherData
+import com.example.jetweatherapp.model.WeatherDataItem
 import com.example.jetweatherapp.viewmodels.LocationViewModel
 import com.example.jetweatherapp.viewmodels.MainScreenViewModel
 import com.example.jetweatherapp.viewmodels.PermissionViewModel
 import com.example.jetweatherapp.widgets.TemperatureText
-import com.example.jetweatherapp.widgets.WormIndicator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -103,6 +95,10 @@ fun MainScreen(
     val textSize by animateFloatAsState(
         targetValue = lerp(32f, 22f, scrollProgress),
         label = "TopAppBar Title Animation"
+    )
+    val vectorSize by animateFloatAsState(
+        targetValue = lerp(20f, 0f, scrollProgress),
+        label = "TopAppBar Location Icon Animation"
     )
     val elevation by animateDpAsState(
         targetValue = lerp(0.dp, 4.dp, scrollProgress),
@@ -154,7 +150,7 @@ fun MainScreen(
                         Text(text = currentWeather.exception.toString())
                     }
                 }
-            } else {
+            } else if(currentWeather.data!=null && forecast.data!=null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -186,8 +182,16 @@ fun MainScreen(
                             }
                             Spacer(modifier = Modifier.height(30.dp))
                             Text(
-                                text = "${currentWeather.data?.name}, ${currentWeather.data?.sys?.country}",
+                                text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
                                 style = TextStyle(fontSize = textSize.sp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Image(
+                                modifier = Modifier
+                                    .size(vectorSize.dp),
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "location icon",
+                                colorFilter = ColorFilter.tint(Color.Red)
                             )
                         }
                     }
@@ -200,14 +204,10 @@ fun MainScreen(
                         .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    currentWeather.data?.let {
-                        forecast.data?.let { it1 ->
-                            MainContent(
-                                currentWeather = it,
-                                forecastData = it1
-                            )
-                        }
-                    }
+                    MainContent(
+                        currentWeather = currentWeather.data!!,
+                        forecastData = forecast.data!!
+                    )
                 }
             }
         }
@@ -218,8 +218,9 @@ fun MainScreen(
 @Composable
 fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
     var currentIndex by remember { mutableIntStateOf(0) }
+    val textList = listOf("Wind Speed : ${currentWeather.wind?.speed}m/s","Wind Direction : ${currentWeather.wind?.deg}°")
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
-    val textList = listOf("First Text", "Second Text")
+    val pagerData = getTomorrowsData(forecastData.list!!)
     LaunchedEffect(Unit) {
         while (true) {
             delay(4000) // Change every 2 seconds
@@ -228,7 +229,7 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
     }
     TemperatureText(
         modifier = Modifier
-            .padding(top = 50.dp),
+            .padding(top = 10.dp),
         style1 = TextStyle(
             fontSize = 120.sp,
             fontWeight = FontWeight.Bold,
@@ -241,166 +242,24 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
         temperature = currentWeather.main?.temp?.toInt()!!,
         unit = "C"
     )
-    Spacer(modifier = Modifier.height(10.dp))
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = "Partly Cloudy 26° / 35° Ait Quality: 81 - Satisfactory",
-        style = TextStyle(fontSize = 18.sp, textAlign = TextAlign.Center, lineHeight = 26.sp)
+        text = "${currentWeather.weather?.get(0)?.main} ${currentWeather.main.temp_min?.toInt()}°/${currentWeather.main.temp_max?.toInt()}° Weather Description - ${currentWeather.weather?.get(0)?.description}",
+        style = TextStyle(fontSize = 16.sp, textAlign = TextAlign.Center, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold)
     )
-    Spacer(modifier = Modifier.height(70.dp))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        shape = RoundedCornerShape(50.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                AnimatedContent(
-                    targetState = textList[currentIndex],
-                    transitionSpec = {
-                        (slideInVertically(
-                            initialOffsetY = { height -> height },
-                            animationSpec = tween(durationMillis = 2000),
-                        ) + fadeIn(animationSpec = tween(durationMillis = 2000))) togetherWith
-                                ((slideOutVertically(
-                                    targetOffsetY = { height -> -height },
-                                    animationSpec = tween(durationMillis = 2000)
-                                ) + fadeOut(animationSpec = tween(durationMillis = 2000))))
-                    },
-                    label = "Vertical Slide Transition"
-                ) { targetText ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(start = 25.dp, end = 25.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = targetText,
-                            style = TextStyle(fontSize = 18.sp)
-                        )
-                    }
-                }
-                IconButton(onClick = {
-
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "dropdown icon"
-                    )
-                }
-            }
-        }
-    }
+    Spacer(modifier = Modifier.height(60.dp))
+    WeatherExpandView(currentIndex,textList)
     Spacer(modifier = Modifier.height(10.dp))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp),
-        shape = RoundedCornerShape(15.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                horizontalArrangement = Arrangement.spacedBy(25.dp)
-            ) {
-                items(forecastData.list!!) {
-                    UpcomingForecast(
-                        iconId = it.weather?.get(0)?.icon!!,
-                        time = getLocalTimeFromUnixTimestamp(it.dt.toString()),
-                        temperature = it.main?.temp?.toInt().toString()
-                    )
-                }
-            }
-        }
-    }
+    HorizontalForecastListOf24Hours(forecastData = forecastData)
     Spacer(modifier = Modifier.height(10.dp))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp),
-        shape = RoundedCornerShape(15.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
-    ) {
-        ConstraintLayout(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            val (hzpager, wormi) = createRefs()
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.constrainAs(hzpager) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-            ) { page ->
-                PageContent(page = page)
-            }
-            WormIndicator(
-                pagerState = pagerState,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .constrainAs(wormi) {
-                        top.linkTo(hzpager.bottom)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                count = 3
-            )
-        }
-    }
-    Spacer(modifier = Modifier.height(20.dp))
+    WeatherViewPager(pagerState = pagerState, pagerData = pagerData)
+    Spacer(modifier = Modifier.height(10.dp))
+    ForecastCard(forecastData = forecastData)
+    Spacer(modifier = Modifier.height(10.dp))
+    WeatherGrid(data = getWeatherGridData(currentWeather = currentWeather))
 }
 
-@Composable
-fun PageContent(page: Int) {
-    val heading = when (page) {
-        0 -> "Tomorrow's Temperature"
-        1 -> "Six Hour Storm Outlook"
-        2 -> "Tomorrow's Feels Like Temperature"
-        else -> "Not Available"
-    }
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = heading, style = TextStyle(fontSize = 18.sp))
-        Text(text = heading, style = TextStyle(fontSize = 14.sp))
-    }
-}
+
 
 @Composable
 fun lerp(start: Float, end: Float, fraction: Float): Float {
@@ -415,13 +274,10 @@ fun lerp(start: Dp, end: Dp, fraction: Float): Dp {
 @Composable
 fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationViewModel) {
     val context = LocalContext.current
-
     val permissionsToRequest = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
     )
-
     val dialogQueue = permissionViewModel.visiblePermissionDialogQueue
-
     val multiplePermissionResultLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions(),
             onResult = { perms ->
@@ -435,17 +291,12 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
     LaunchedEffect(key1 = Unit) {
         multiplePermissionResultLauncher.launch(permissionsToRequest)
     }
-
     LaunchedEffect(locationViewModel.currentLocation.value) {
         if (!dialogQueue.containsAll(permissionsToRequest.toList())) {
             async { locationViewModel.startLocationUpdates() }.await()
         } else {
             async { locationViewModel.stopLocationUpdates() }.await()
         }
-        Log.d(
-            "LOCATION_TAG",
-            "${locationViewModel.currentLocation.value?.latitude} ${locationViewModel.currentLocation.value?.longitude}"
-        )
     }
 
     dialogQueue.reversed().forEach { permission ->
@@ -457,7 +308,6 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
             Manifest.permission.ACCESS_COARSE_LOCATION -> {
                 LocationPermissionTextProvider()
             }
-
             else -> return@forEach
         },
             isPermanentlyDeclined = !permissionViewModel.shouldShowRationale(permission),
@@ -486,4 +336,42 @@ fun getLocalTimeFromUnixTimestamp(unixTimestamp: String): String {
     val zonedDateTime = ZonedDateTime.ofInstant(instant, zoneId)
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     return zonedDateTime.format(timeFormatter)
+}
+
+fun getTomorrowsData(forecastList: List<WeatherDataItem>): List<String> {
+    val data = arrayListOf<String>()
+    val tomorrowDate = LocalDate.now().plusDays(1).toString()
+    forecastList.forEach {
+        if(it.dt_txt?.contains(tomorrowDate)!!) {
+            data.add("${it.main?.temp.toString()}°")
+            data.add("Min : ${it.main?.temp_min}° / Max : ${it.main?.temp_max}°")
+            data.add("${it.main?.feels_like.toString()}°")
+            return data
+        }
+    }
+    return data
+}
+
+fun getDistinctDateData(forecastList: List<WeatherDataItem>): List<WeatherDataItem> {
+    val data = arrayListOf<WeatherDataItem>()
+    var prev = ""
+    for(i in forecastList.indices) {
+        val curr = forecastList[i].dt_txt?.split(" ")?.get(0)!!
+        if(curr != prev) {
+            prev = curr
+            data.add(forecastList[i])
+        }
+    }
+    return data
+}
+
+fun getWeatherGridData(currentWeather: CurrentWeather): List<List<String>> {
+    val data = arrayListOf<ArrayList<String>>()
+    data.add(arrayListOf(R.drawable.ic_sun.toString(),"Sunrise", getLocalTimeFromUnixTimestamp(currentWeather.sys?.sunrise.toString()), ""))
+    data.add(arrayListOf(R.drawable.ic_tempmeter.toString(),"Feels Like", currentWeather.main?.feels_like?.toInt().toString()+"°", ""))
+    data.add(arrayListOf(R.drawable.ic_humidity.toString(),"Humidity", currentWeather.main?.humidity.toString()+"%", ""))
+    data.add(arrayListOf(R.drawable.ic_wind.toString(),"E Wind", currentWeather.wind?.speed.toString(), "mph"))
+    data.add(arrayListOf(R.drawable.ic_airquality.toString(),"Air Pressure", currentWeather.main?.pressure.toString(), "hPa"))
+    data.add(arrayListOf(R.drawable.ic_visibility.toString(),"Visibility", currentWeather.visibility.toString(), "km"))
+    return data
 }

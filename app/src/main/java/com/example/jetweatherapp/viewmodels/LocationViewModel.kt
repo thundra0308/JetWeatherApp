@@ -30,8 +30,8 @@ class LocationViewModel @Inject constructor(@ApplicationContext private val cont
     fun startLocationUpdates() {
         viewModelScope.launch {
             val locationRequest = LocationRequest.create().apply {
-                interval = 300000 // Update location every 10 seconds
-                fastestInterval = 150000
+                interval = 60000 // Update location every 10 seconds
+                fastestInterval = 30000
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
             locationCallback = object : LocationCallback() {
