@@ -24,7 +24,7 @@ fun HorizontalForecastListOf24Hours(forecastData: WeatherData) {
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp),
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardDefaults.cardColors().containerColor.copy(
                 alpha = 0.5f

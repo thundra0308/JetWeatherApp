@@ -1,16 +1,30 @@
 package com.example.jetweatherapp.widgets
 
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.jetweatherapp.model.CurrentWeather
 
-@Preview
+@Composable
+fun TemperatureTextMain(currentWeather: CurrentWeather) {
+    TemperatureText(
+        modifier = Modifier.padding(top = 40.dp), style1 = TextStyle(
+            fontSize = 120.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Default
+        ), style2 = TextStyle(
+            fontSize = 80.sp, fontWeight = FontWeight.Bold
+        ), temperature = currentWeather.main?.temp?.toInt()!!, unit = "C"
+    )
+}
+
 @Composable
 fun TemperatureText(
     modifier: Modifier = Modifier,
@@ -21,19 +35,13 @@ fun TemperatureText(
     temperature: Int = 0,
     unit: String = "C"
 ) {
-    val temperatureSymbol = when (unit.uppercase()) {
-        "C" -> "°C"
-        "F" -> "°F"
-        "K" -> "K"
-        else -> ""
-    }
     ConstraintLayout(
         modifier = modifier,
     ) {
-        val (tvTemp,tvUnit) = createRefs()
+        val (tvTemp, tvUnit) = createRefs()
         Text(
             modifier = modifier1
-                .constrainAs(tvTemp){
+                .constrainAs(tvTemp) {
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
@@ -45,7 +53,7 @@ fun TemperatureText(
         )
         Text(
             modifier = modifier2
-                .constrainAs(tvUnit){
+                .constrainAs(tvUnit) {
                     start.linkTo(tvTemp.end)
                     top.linkTo(tvTemp.top)
                 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,8 +22,8 @@ fun ForecastCard(forecastData: WeatherData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp),
-        shape = RoundedCornerShape(15.dp),
+            .height(290.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardDefaults.cardColors().containerColor.copy(
                 alpha = 0.5f
@@ -32,8 +33,8 @@ fun ForecastCard(forecastData: WeatherData) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 25.dp),
-            verticalArrangement = Arrangement.Top
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+            verticalArrangement = Arrangement.Center
         ) {
             items(getDistinctDateData(forecastData.list!!)) {
                 ForecastRow(forecast = it)

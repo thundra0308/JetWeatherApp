@@ -73,7 +73,9 @@ fun SplashScreen(navController: NavController) {
             )
         )
         delay(2000L)
-        navController.navigate(WeatherScreens.MainScreen.name)
+        navController.navigate(WeatherScreens.MainScreen.name) {
+            popUpTo(WeatherScreens.SplashScreen.name) {inclusive = true}
+        }
     }
     Surface (
         modifier = Modifier.scale(scale.value)

@@ -16,7 +16,6 @@ import javax.inject.Inject
 class MainScreenViewModel @Inject constructor(private val repository: WeatherRepository) : ViewModel() {
 
     val currentWeather: MutableState<DataOrException<CurrentWeather, Boolean, Exception>> = mutableStateOf(DataOrException())
-
     val forecast: MutableState<DataOrException<WeatherData, Boolean, Exception>> = mutableStateOf(DataOrException())
 
     fun getCurrentWeather(latitude: Double, longitude: Double) {
