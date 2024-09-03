@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,11 +25,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.jetweatherapp.screens.getTomorrowsData
 import com.example.jetweatherapp.widgets.WormIndicator
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WeatherViewPager(pagerState: PagerState, pagerData: List<String>) {
+fun WeatherViewPager(pagerData: List<String>) {
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
     Card(
         modifier = Modifier
             .fillMaxWidth()

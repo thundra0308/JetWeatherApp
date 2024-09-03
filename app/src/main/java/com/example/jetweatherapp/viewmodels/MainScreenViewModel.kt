@@ -1,7 +1,5 @@
 package com.example.jetweatherapp.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jetweatherapp.data.DataOrException
@@ -9,33 +7,39 @@ import com.example.jetweatherapp.model.CurrentWeather
 import com.example.jetweatherapp.model.WeatherData
 import com.example.jetweatherapp.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(private val repository: WeatherRepository) : ViewModel() {
 
-    val currentWeather: MutableState<DataOrException<CurrentWeather, Boolean, Exception>> = mutableStateOf(DataOrException())
-    val forecast: MutableState<DataOrException<WeatherData, Boolean, Exception>> = mutableStateOf(DataOrException())
+    private val _currentWeather = MutableStateFlow(DataOrException<CurrentWeather, Boolean, Exception>())
+    val currentWeather: StateFlow<DataOrException<CurrentWeather, Boolean, Exception>> = _currentWeather.asStateFlow()
+
+    private val _forecast = MutableStateFlow(DataOrException<WeatherData, Boolean, Exception>())
+    val forecast: StateFlow<DataOrException<WeatherData, Boolean, Exception>> = _forecast.asStateFlow()
 
     fun getCurrentWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            currentWeather.value = DataOrException(loading = true)
+            _currentWeather.emit(DataOrException(loading = true))
             val result = repository.getCurrentWeather(latitude, longitude)
-            currentWeather.value = result
+            _currentWeather.emit(result)
             if (result.data != null) {
-                currentWeather.value = result.copy(loading = false)
+                _currentWeather.emit(result.copy(loading = false))
             }
         }
     }
 
     fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            forecast.value = DataOrException(loading = true)
+            _forecast.emit(DataOrException(loading = true))
             val result = repository.get5Day3HourWeatherForecast(latitude, longitude)
-            forecast.value = result
+            _forecast.emit(result)
             if (result.data != null) {
-                forecast.value = result.copy(loading = false)
+                _forecast.emit(result.copy(loading = false))
             }
         }
     }

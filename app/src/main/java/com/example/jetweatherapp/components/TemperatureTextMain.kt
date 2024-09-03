@@ -18,7 +18,7 @@ import com.example.jetweatherapp.model.CurrentWeather
 fun TemperatureTextMain(currentWeather: CurrentWeather) {
     TemperatureText(
         modifier = Modifier.padding(top = 40.dp), style1 = TextStyle(
-            fontSize = 120.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Default
+            fontSize = 100.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Default
         ), style2 = TextStyle(
             fontSize = 80.sp, fontWeight = FontWeight.Bold
         ), temperature = currentWeather.main?.temp?.toInt()!!, unit = "C"

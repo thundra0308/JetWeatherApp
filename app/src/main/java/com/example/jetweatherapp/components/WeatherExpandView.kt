@@ -24,6 +24,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -31,9 +36,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.jetweatherapp.model.CurrentWeather
+import kotlinx.coroutines.delay
 
 @Composable
-fun WeatherExpandView(currentIndex: Int, textList: List<String>) {
+fun WeatherExpandView(currentWeather: CurrentWeather) {
+    val currentIndex = remember { mutableIntStateOf(0) }
+    val textList = listOf(
+        "Wind Speed : ${currentWeather.wind?.speed}m/s",
+        "Wind Direction : ${currentWeather.wind?.deg}°"
+    )
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(4000) // Change every 2 seconds
+            currentIndex.intValue = (currentIndex.intValue + 1) % textList.size
+        }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +74,7 @@ fun WeatherExpandView(currentIndex: Int, textList: List<String>) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 AnimatedContent(
-                    targetState = textList[currentIndex],
+                    targetState = textList[currentIndex.intValue],
                     transitionSpec = {
                         (slideInVertically(
                             initialOffsetY = { height -> height },

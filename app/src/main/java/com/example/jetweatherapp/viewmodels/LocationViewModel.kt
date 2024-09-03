@@ -16,7 +16,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +29,8 @@ class LocationViewModel @Inject constructor(@ApplicationContext private val cont
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
     private lateinit var locationCallback: LocationCallback
-    val currentLocation = mutableStateOf<Location?>(null)
+    private val _currentLocationFlow = MutableStateFlow<Location?>(null)
+    val currentLocationFlow = _currentLocationFlow.asStateFlow()
 
     fun startLocationUpdates() {
         viewModelScope.launch {
@@ -35,7 +40,9 @@ class LocationViewModel @Inject constructor(@ApplicationContext private val cont
                 .build()
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(p0: LocationResult) {
-                    currentLocation.value = p0.lastLocation
+                    viewModelScope.launch {
+                        _currentLocationFlow.emit(p0.lastLocation)
+                    }
                 }
             }
             if (ActivityCompat.checkSelfPermission(

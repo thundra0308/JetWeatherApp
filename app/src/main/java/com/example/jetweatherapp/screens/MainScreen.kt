@@ -6,9 +6,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,35 +24,35 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import com.example.jetweatherapp.R
 import com.example.jetweatherapp.components.ForecastCard
 import com.example.jetweatherapp.components.HorizontalForecastListOf24Hours
 import com.example.jetweatherapp.components.LocationPermissionTextProvider
 import com.example.jetweatherapp.components.PermissionDialog
+import com.example.jetweatherapp.components.TemperatureTextMain
 import com.example.jetweatherapp.components.WeatherDescription
 import com.example.jetweatherapp.components.WeatherExpandView
 import com.example.jetweatherapp.components.WeatherGrid
@@ -66,8 +63,6 @@ import com.example.jetweatherapp.model.WeatherDataItem
 import com.example.jetweatherapp.viewmodels.LocationViewModel
 import com.example.jetweatherapp.viewmodels.MainScreenViewModel
 import com.example.jetweatherapp.viewmodels.PermissionViewModel
-import com.example.jetweatherapp.components.TemperatureTextMain
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -84,24 +79,9 @@ fun MainScreen(
     locationViewModel: LocationViewModel
 ) {
     // States
-    val currentLocation = locationViewModel.currentLocation.value
-    val currentWeather = mainScreenViewModel.currentWeather.value
-    val forecast = mainScreenViewModel.forecast.value
-    val scrollState = rememberScrollState()
-    val nestedScrollConnection = object : NestedScrollConnection {}
-
-    // Animation
-    val maxScrollOffset = 150f
-    val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
-    val textSize by animateFloatAsState(
-        targetValue = lerp(32f, 22f, scrollProgress), label = "TopAppBar Title Animation"
-    )
-    val vectorSize by animateFloatAsState(
-        targetValue = lerp(20f, 0f, scrollProgress), label = "TopAppBar Location Icon Animation"
-    )
-    val elevation by animateDpAsState(
-        targetValue = lerp(0.dp, 4.dp, scrollProgress), label = "TopAppBar Elevation Animation"
-    )
+    val currentLocation = locationViewModel.currentLocationFlow.collectAsState().value
+    val currentWeather = mainScreenViewModel.currentWeather.collectAsState().value
+    val forecast = mainScreenViewModel.forecast.collectAsState().value
 
     // Side Effects
     LaunchedEffect(key1 = currentLocation) {
@@ -139,48 +119,83 @@ fun MainScreen(
                     }
                 }
             } else if (currentWeather.data != null && forecast.data != null) {
+                val scrollState = rememberScrollState()
+                val nestedScrollConnection = object : NestedScrollConnection {}
+                val maxScrollOffset = 150f
+                val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
+                val textSize by animateFloatAsState(
+                    targetValue = lerp(32f, 22f, scrollProgress),
+                    label = "TopAppBar Title Animation"
+                )
+                val vectorSize by animateFloatAsState(
+                    targetValue = lerp(20f, 0f, scrollProgress),
+                    label = "TopAppBar Location Icon Animation"
+                )
+                val dividerAlpha by animateFloatAsState(
+                    targetValue = lerp(0f, 1f, scrollProgress),
+                    label = "TopAppBar Elevation Animation"
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .height(200.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Surface(
-                        modifier = Modifier,
-                        shadowElevation = elevation
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .clipToBounds(),
+                        verticalArrangement = Arrangement.Bottom,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                        SearchBar(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 25.dp, end = 25.dp),
+                            shadowElevation = 0.dp,
+                            tonalElevation = 5.dp,
+                            shape = RoundedCornerShape(15.dp),
+                            query = "",
+                            onQueryChange = {},
+                            onSearch = {},
+                            active = false,
+                            onActiveChange = {}
                         ) {
-                            SearchBar(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp),
-                                shadowElevation = 0.dp,
-                                tonalElevation = 5.dp,
-                                shape = RoundedCornerShape(15.dp),
-                                query = "",
-                                onQueryChange = {},
-                                onSearch = {},
-                                active = false,
-                                onActiveChange = {}
-                            ) {
 
-                            }
-                            Spacer(modifier = Modifier.height(30.dp))
-                            Text(
-                                text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
-                                style = TextStyle(fontSize = textSize.sp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Image(
-                                modifier = Modifier.size(vectorSize.dp),
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = "location icon",
-                                colorFilter = ColorFilter.tint(Color.Red)
-                            )
                         }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .clipToBounds(),
+                        verticalArrangement = Arrangement.Bottom,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Spacer(modifier = Modifier.height(30.dp))
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 15.dp),
+                            text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
+                            style = TextStyle(fontSize = textSize.sp)
+                        )
+                        Image(
+                            modifier = Modifier
+                                .padding(start = 15.dp)
+                                .size(vectorSize.dp),
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "location icon",
+                            colorFilter = ColorFilter.tint(Color.Red),
+                            contentScale = ContentScale.Fit
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            thickness = 0.5.dp,
+                            color = Color.Gray.copy(alpha = dividerAlpha)
+                        )
                     }
                 }
                 Column(
@@ -192,39 +207,28 @@ fun MainScreen(
                         .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    MainContent(
-                        currentWeather = currentWeather.data!!, forecastData = forecast.data!!
-                    )
+                    MainContentWrapper(currentWeather.data!!, forecast.data!!)
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MainContentWrapper(currentWeather: CurrentWeather, forecastData: WeatherData) {
+    MainContent(currentWeather = currentWeather, forecastData = forecastData)
+}
+
 @Composable
 fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
-    var currentIndex by remember { mutableIntStateOf(0) }
-    val textList = listOf(
-        "Wind Speed : ${currentWeather.wind?.speed}m/s",
-        "Wind Direction : ${currentWeather.wind?.deg}°"
-    )
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
-    val pagerData = getTomorrowsData(forecastData.list!!)
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(4000) // Change every 2 seconds
-            currentIndex = (currentIndex + 1) % textList.size
-        }
-    }
     TemperatureTextMain(currentWeather)
     WeatherDescription(currentWeather = currentWeather)
     Spacer(modifier = Modifier.height(70.dp))
-    WeatherExpandView(currentIndex, textList)
+    WeatherExpandView(currentWeather = currentWeather)
     Spacer(modifier = Modifier.height(10.dp))
     HorizontalForecastListOf24Hours(forecastData = forecastData)
     Spacer(modifier = Modifier.height(10.dp))
-    WeatherViewPager(pagerState = pagerState, pagerData = pagerData)
+    WeatherViewPager(pagerData = getTomorrowsData(forecastData.list!!))
     Spacer(modifier = Modifier.height(10.dp))
     ForecastCard(forecastData = forecastData)
     Spacer(modifier = Modifier.height(10.dp))
@@ -255,8 +259,8 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
         multiplePermissionResultLauncher.launch(permissionsToRequest)
     }
     LaunchedEffect(
-        key1 = locationViewModel.currentLocation.value,
-        key2 = permissionViewModel.isLocationPermissionGranted.value
+        key1 = locationViewModel.currentLocationFlow.collectAsState().value,
+        key2 = permissionViewModel.isLocationPermissionGranted.collectAsState().value
     ) {
         if (!dialogQueue.containsAll(permissionsToRequest.toList())) {
             locationViewModel.startLocationUpdates()
@@ -295,11 +299,6 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
 
 @Composable
 fun lerp(start: Float, end: Float, fraction: Float): Float {
-    return start + fraction * (end - start)
-}
-
-@Composable
-fun lerp(start: Dp, end: Dp, fraction: Float): Dp {
     return start + fraction * (end - start)
 }
 
