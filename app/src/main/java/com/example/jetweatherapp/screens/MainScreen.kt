@@ -66,7 +66,7 @@ import com.example.jetweatherapp.model.WeatherDataItem
 import com.example.jetweatherapp.viewmodels.LocationViewModel
 import com.example.jetweatherapp.viewmodels.MainScreenViewModel
 import com.example.jetweatherapp.viewmodels.PermissionViewModel
-import com.example.jetweatherapp.widgets.TemperatureTextMain
+import com.example.jetweatherapp.components.TemperatureTextMain
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -229,6 +229,7 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
     ForecastCard(forecastData = forecastData)
     Spacer(modifier = Modifier.height(10.dp))
     WeatherGrid(data = getWeatherGridData(currentWeather = currentWeather))
+    Spacer(modifier = Modifier.height(10.dp))
     Spacer(modifier = Modifier.height(50.dp))
 }
 

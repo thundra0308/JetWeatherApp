@@ -1,4 +1,4 @@
-package com.example.jetweatherapp.widgets
+package com.example.jetweatherapp.components
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding

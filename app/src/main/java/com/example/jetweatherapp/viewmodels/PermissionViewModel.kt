@@ -36,7 +36,7 @@ class PermissionViewModel @Inject constructor(@ApplicationContext private val co
         return activity?.shouldShowRequestPermissionRationale(permission) ?: false
     }
 
-    fun isLocationPermissionGranted() {
+    private fun isLocationPermissionGranted() {
         viewModelScope.launch {
             if(ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
                 isLocationPermissionGranted.value = true
