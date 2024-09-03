@@ -18,14 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +50,7 @@ import com.example.jetweatherapp.R
 import com.example.jetweatherapp.components.ForecastCard
 import com.example.jetweatherapp.components.HorizontalForecastListOf24Hours
 import com.example.jetweatherapp.components.LocationPermissionTextProvider
+import com.example.jetweatherapp.components.LocationSearchBar
 import com.example.jetweatherapp.components.PermissionDialog
 import com.example.jetweatherapp.components.TemperatureTextMain
 import com.example.jetweatherapp.components.WeatherDescription
@@ -70,7 +70,6 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     navController: NavController,
@@ -150,20 +149,30 @@ fun MainScreen(
                         verticalArrangement = Arrangement.Bottom,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        SearchBar(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 25.dp, end = 25.dp),
-                            shadowElevation = 0.dp,
-                            tonalElevation = 5.dp,
-                            shape = RoundedCornerShape(15.dp),
-                            query = "",
-                            onQueryChange = {},
-                            onSearch = {},
-                            active = false,
-                            onActiveChange = {}
-                        ) {
-
+                        val searchQuery = remember {
+                            mutableStateOf("")
                         }
+                        val searchActive = remember {
+                            mutableStateOf(false)
+                        }
+                        LocationSearchBar(
+                            modifier = Modifier,
+                            query = searchQuery.value,
+                            onQueryChange = {
+                                searchQuery.value = it
+                            },
+                            onSearch = {
+
+                            },
+                            active = searchActive.value,
+                            onActiveChange = {
+                                searchActive.value = it
+                            },
+                            onClear = {
+                                searchQuery.value = ""
+                                searchActive.value = false
+                            }
+                        )
                     }
                     Column(
                         modifier = Modifier
