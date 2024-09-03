@@ -1,9 +1,16 @@
 package com.example.jetweatherapp.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,13 +20,21 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.jetweatherapp.data.DataOrException
 import com.example.jetweatherapp.model.LocationDataItem
+import java.util.ArrayList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Preview
@@ -32,18 +47,16 @@ fun LocationSearchBar(
     active: Boolean = false,
     onActiveChange: (Boolean) -> Unit = {},
     onClear: () -> Unit = {},
-    searchResult: List<LocationDataItem> = arrayListOf()
+    searchResult: DataOrException<ArrayList<LocationDataItem>, Boolean, Exception> = DataOrException()
 ) {
     SearchBar(
         modifier = if (active) {
             modifier
                 .fillMaxWidth()
-                .animateContentSize()
         } else {
             modifier
                 .fillMaxWidth()
                 .padding(start = 25.dp, end = 25.dp)
-                .animateContentSize()
         },
         shadowElevation = 0.dp,
         tonalElevation = 5.dp,
@@ -69,12 +82,58 @@ fun LocationSearchBar(
             }
         }
     ) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxSize()
-        ) {
-            items(searchResult) {
-                Text(text = "${it.name}, ${it.state} ${it.country}")
+        if(searchResult.loading==true) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LinearProgressIndicator()
+            }
+        } else {
+            if(searchResult.exception!=null) {
+                Snackbar {
+                    Column {
+                        Text(text = searchResult.exception!!.message.toString())
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if(!searchResult.data.isNullOrEmpty()) {
+                        LazyColumn(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            items(searchResult.data!!) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp),
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${it.name}, ${it.state} ${it.country}",
+                                        style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "Location Not Found!",
+                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        )
+                    }
+                }
             }
         }
     }

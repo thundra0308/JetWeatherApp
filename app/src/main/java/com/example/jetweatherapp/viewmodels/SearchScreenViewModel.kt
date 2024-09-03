@@ -21,30 +21,6 @@ class SearchScreenViewModel @Inject constructor(private val geocodingRepository:
     val weather: MutableState<DataOrException<CurrentWeather, Boolean, Exception>> = mutableStateOf(DataOrException())
     val forecast: MutableState<DataOrException<WeatherData, Boolean, Exception>> = mutableStateOf(DataOrException())
 
-    fun getCoordinatesByLocationName(query: String) {
-        viewModelScope.launch {
-            if (query.isEmpty()) return@launch
-            coordinates.value = DataOrException(loading = true)
-            val result = geocodingRepository.getCoordinatesByLocationName(query)
-            coordinates.value = result
-            if (result.data != null && result.data!!.isNotEmpty()) {
-                coordinates.value = result.copy(loading = false)
-            }
-        }
-    }
-
-    fun getCoordinatesByZipCode(query: String) {
-        viewModelScope.launch {
-            if (query.isEmpty()) return@launch
-            coordinates.value = DataOrException(loading = true)
-            val result = geocodingRepository.getCoordinatesByZipCode(query)
-            coordinates.value = result
-            if (result.data != null && result.data!!.isNotEmpty()) {
-                coordinates.value = result.copy(loading = false)
-            }
-        }
-    }
-
     fun getCurrentWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             weather.value = DataOrException(loading = true)

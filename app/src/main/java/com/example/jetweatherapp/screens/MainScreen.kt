@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,10 +82,13 @@ fun MainScreen(
     val currentLocation = locationViewModel.currentLocationFlow.collectAsState().value
     val currentWeather = mainScreenViewModel.currentWeather.collectAsState().value
     val forecast = mainScreenViewModel.forecast.collectAsState().value
+    val searchActive = remember {
+        mutableStateOf(false)
+    }
 
     // Side Effects
     LaunchedEffect(key1 = currentLocation) {
-        if (currentLocation != null) {
+        if (currentLocation != null && !searchActive.value) {
             mainScreenViewModel.getCurrentWeather(
                 currentLocation.latitude, currentLocation.longitude
             )
@@ -97,10 +101,8 @@ fun MainScreen(
     // Ui
     SetUp(permissionViewModel, locationViewModel)
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
             if (currentWeather.loading == true || forecast.loading == true) {
                 Column(
@@ -118,16 +120,20 @@ fun MainScreen(
                     }
                 }
             } else if (currentWeather.data != null && forecast.data != null) {
+                val coordinates = mainScreenViewModel.coordinates.collectAsState().value
                 val scrollState = rememberScrollState()
                 val nestedScrollConnection = object : NestedScrollConnection {}
+                val searchQuery = remember {
+                    mutableStateOf("")
+                }
                 val maxScrollOffset = 150f
                 val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
                 val textSize by animateFloatAsState(
-                    targetValue = lerp(32f, 22f, scrollProgress),
+                    targetValue = lerp(28f, 22f, scrollProgress),
                     label = "TopAppBar Title Animation"
                 )
                 val vectorSize by animateFloatAsState(
-                    targetValue = lerp(20f, 0f, scrollProgress),
+                    targetValue = lerp(18f, 0f, scrollProgress),
                     label = "TopAppBar Location Icon Animation"
                 )
                 val dividerAlpha by animateFloatAsState(
@@ -136,88 +142,98 @@ fun MainScreen(
                 )
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .clipToBounds(),
-                        verticalArrangement = Arrangement.Bottom,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val searchQuery = remember {
-                            mutableStateOf("")
-                        }
-                        val searchActive = remember {
-                            mutableStateOf(false)
-                        }
-                        LocationSearchBar(
-                            modifier = Modifier,
-                            query = searchQuery.value,
-                            onQueryChange = {
-                                searchQuery.value = it
-                            },
-                            onSearch = {
-
-                            },
-                            active = searchActive.value,
-                            onActiveChange = {
-                                searchActive.value = it
-                            },
-                            onClear = {
-                                searchQuery.value = ""
-                                searchActive.value = false
-                            }
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .clipToBounds(),
-                        verticalArrangement = Arrangement.Bottom,
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Spacer(modifier = Modifier.height(30.dp))
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 15.dp),
-                            text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
-                            style = TextStyle(fontSize = textSize.sp)
-                        )
-                        Image(
-                            modifier = Modifier
-                                .padding(start = 15.dp)
-                                .size(vectorSize.dp),
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "location icon",
-                            colorFilter = ColorFilter.tint(Color.Red),
-                            contentScale = ContentScale.Fit
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            thickness = 0.5.dp,
-                            color = Color.Gray.copy(alpha = dividerAlpha)
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 15.dp, end = 15.dp)
-                        .verticalScroll(scrollState)
-                        .nestedScroll(nestedScrollConnection)
-                        .wrapContentHeight(),
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    MainContentWrapper(currentWeather.data!!, forecast.data!!)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .clipToBounds(),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .clipToBounds(),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Spacer(modifier = Modifier.height(30.dp))
+                            Text(
+                                modifier = Modifier
+                                    .padding(start = 15.dp),
+                                text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
+                                style = TextStyle(fontSize = textSize.sp)
+                            )
+                            Image(
+                                modifier = Modifier
+                                    .padding(start = 15.dp)
+                                    .size(vectorSize.dp),
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "location icon",
+                                colorFilter = ColorFilter.tint(Color.Red),
+                                contentScale = ContentScale.Fit
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = Color.Gray.copy(alpha = dividerAlpha)
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 15.dp, end = 15.dp)
+                            .verticalScroll(scrollState)
+                            .nestedScroll(nestedScrollConnection)
+                            .wrapContentHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        MainContentWrapper(currentWeather.data!!, forecast.data!!)
+                    }
                 }
+                LocationSearchBar(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    query = searchQuery.value,
+                    onQueryChange = {
+                        searchQuery.value = it
+                    },
+                    onSearch = {
+                        if (searchQuery.value.trim().isNotEmpty()) {
+                            if (searchQuery.value.toIntOrNull() != null) {
+                                mainScreenViewModel.getCoordinatesByZipCode(searchQuery.value)
+                            } else {
+                                mainScreenViewModel.getCoordinatesByLocationName(searchQuery.value)
+                            }
+                        }
+                    },
+                    active = searchActive.value,
+                    onActiveChange = {
+                        searchActive.value = it
+                    },
+                    onClear = {
+                        searchQuery.value = ""
+                        searchActive.value = false
+                        coordinates.data = null
+                    },
+                    searchResult = coordinates
+                )
             }
         }
     }
