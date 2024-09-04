@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,11 +58,6 @@ fun GridCard(modifier: Modifier, i: Int, data: List<List<String>>) {
     Card(
         modifier = modifier.size(100.dp),
         shape = RoundedCornerShape(15.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
     ) {
         Column(
             modifier = Modifier

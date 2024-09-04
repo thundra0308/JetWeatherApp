@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,11 +24,6 @@ fun HorizontalForecastListOf24Hours(forecastData: WeatherData) {
             .fillMaxWidth()
             .height(120.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
     ) {
         Column(
             modifier = Modifier
@@ -41,7 +35,7 @@ fun HorizontalForecastListOf24Hours(forecastData: WeatherData) {
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(25.dp)
             ) {
-                items(forecastData.list?.subList(0,10)!!) {
+                items(forecastData.list?.subList(0, 10)!!) {
                     UpcomingForecast(
                         iconId = it.weather?.get(0)?.icon!!,
                         time = getLocalTimeFromUnixTimestamp(it.dt.toString()),

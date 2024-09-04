@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.jetweatherapp.screens.getTomorrowsData
 import com.example.jetweatherapp.widgets.WormIndicator
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -37,21 +34,16 @@ fun WeatherViewPager(pagerData: List<String>) {
             .fillMaxWidth()
             .height(120.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardDefaults.cardColors().containerColor.copy(
-                alpha = 0.5f
-            )
-        )
     ) {
         ConstraintLayout(
             modifier = Modifier.fillMaxSize(),
         ) {
-            val (hzpager, wormi) = createRefs()
+            val (hzPager, workIndicator) = createRefs()
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.constrainAs(hzpager) {
+                modifier = Modifier.constrainAs(hzPager) {
                     top.linkTo(parent.top)
-                    bottom.linkTo(wormi.bottom)
+                    bottom.linkTo(workIndicator.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
@@ -62,7 +54,7 @@ fun WeatherViewPager(pagerData: List<String>) {
                 pagerState = pagerState,
                 modifier = Modifier
                     .padding(5.dp)
-                    .constrainAs(wormi) {
+                    .constrainAs(workIndicator) {
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
@@ -86,8 +78,19 @@ fun PageContent(page: Int, data: String) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = heading, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            text = heading,
+            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         Spacer(modifier = Modifier.height(5.dp))
-        Text(text = data, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = Color.Gray, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            text = data,
+            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+            color = Color.Gray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

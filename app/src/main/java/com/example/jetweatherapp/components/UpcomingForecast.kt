@@ -38,14 +38,14 @@ fun UpcomingForecast(
             text = time,
             style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Image(
             painter = painter,
             contentDescription = "Loaded Image",
             modifier = Modifier.size(40.dp),
             contentScale = ContentScale.Fit
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             modifier = Modifier.padding(bottom = 0.dp),
             text = "$temperature°",

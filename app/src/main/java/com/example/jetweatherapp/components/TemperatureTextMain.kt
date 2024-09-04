@@ -21,7 +21,7 @@ fun TemperatureTextMain(currentWeather: CurrentWeather) {
             fontSize = 100.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Default
         ), style2 = TextStyle(
             fontSize = 80.sp, fontWeight = FontWeight.Bold
-        ), temperature = currentWeather.main?.temp?.toInt()!!, unit = "C"
+        ), temperature = currentWeather.main?.temp?.toInt()!!
     )
 }
 
@@ -33,7 +33,6 @@ fun TemperatureText(
     style1: TextStyle = TextStyle(),
     style2: TextStyle = TextStyle(),
     temperature: Int = 0,
-    unit: String = "C"
 ) {
     ConstraintLayout(
         modifier = modifier,

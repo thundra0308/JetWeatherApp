@@ -1,8 +1,5 @@
 package com.example.jetweatherapp.components
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -34,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetweatherapp.data.DataOrException
 import com.example.jetweatherapp.model.LocationDataItem
-import java.util.ArrayList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Preview
@@ -47,7 +43,8 @@ fun LocationSearchBar(
     active: Boolean = false,
     onActiveChange: (Boolean) -> Unit = {},
     onClear: () -> Unit = {},
-    searchResult: DataOrException<ArrayList<LocationDataItem>, Boolean, Exception> = DataOrException()
+    searchResult: DataOrException<ArrayList<LocationDataItem>, Boolean, Exception> = DataOrException(),
+    onLocationClick: (Int) -> Unit = {}
 ) {
     SearchBar(
         modifier = if (active) {
@@ -59,7 +56,6 @@ fun LocationSearchBar(
                 .padding(start = 25.dp, end = 25.dp)
         },
         shadowElevation = 0.dp,
-        tonalElevation = 5.dp,
         shape = RoundedCornerShape(15.dp),
         placeholder = {
             Text(text = "Enter Search Location")
@@ -82,7 +78,7 @@ fun LocationSearchBar(
             }
         }
     ) {
-        if(searchResult.loading==true) {
+        if (searchResult.loading == true) {
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -92,7 +88,7 @@ fun LocationSearchBar(
                 LinearProgressIndicator()
             }
         } else {
-            if(searchResult.exception!=null) {
+            if (searchResult.exception != null) {
                 Snackbar {
                     Column {
                         Text(text = searchResult.exception!!.message.toString())
@@ -105,24 +101,30 @@ fun LocationSearchBar(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if(!searchResult.data.isNullOrEmpty()) {
+                    if (!searchResult.data.isNullOrEmpty()) {
                         LazyColumn(
                             modifier = modifier
                                 .fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
                             verticalArrangement = Arrangement.Top
                         ) {
-                            items(searchResult.data!!) {
+                            itemsIndexed(searchResult.data!!) { index, item ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(50.dp),
+                                        .height(50.dp)
+                                        .clickable {
+                                            onLocationClick(index)
+                                        },
                                     horizontalArrangement = Arrangement.Start,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "${it.name}, ${it.state} ${it.country}",
-                                        style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                                        text = "${item.name}, ${item.state} ${item.country}",
+                                        style = TextStyle(
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
                                     )
                                 }
                             }

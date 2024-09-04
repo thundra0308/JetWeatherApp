@@ -11,6 +11,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +20,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,6 +61,7 @@ import com.example.jetweatherapp.components.HorizontalForecastListOf24Hours
 import com.example.jetweatherapp.components.LocationPermissionTextProvider
 import com.example.jetweatherapp.components.LocationSearchBar
 import com.example.jetweatherapp.components.PermissionDialog
+import com.example.jetweatherapp.components.ResetButton
 import com.example.jetweatherapp.components.TemperatureTextMain
 import com.example.jetweatherapp.components.WeatherDescription
 import com.example.jetweatherapp.components.WeatherExpandView
@@ -61,6 +70,7 @@ import com.example.jetweatherapp.components.WeatherViewPager
 import com.example.jetweatherapp.model.CurrentWeather
 import com.example.jetweatherapp.model.WeatherData
 import com.example.jetweatherapp.model.WeatherDataItem
+import com.example.jetweatherapp.navigation.WeatherScreens
 import com.example.jetweatherapp.viewmodels.LocationViewModel
 import com.example.jetweatherapp.viewmodels.MainScreenViewModel
 import com.example.jetweatherapp.viewmodels.PermissionViewModel
@@ -79,32 +89,74 @@ fun MainScreen(
     locationViewModel: LocationViewModel
 ) {
     // States
-    val currentLocation = locationViewModel.currentLocationFlow.collectAsState().value
-    val currentWeather = mainScreenViewModel.currentWeather.collectAsState().value
+    val locationPermission = permissionViewModel.isLocationPermissionGranted.collectAsState().value
+    val location = locationViewModel.currentLocationFlow.collectAsState().value
+    val weather = mainScreenViewModel.currentWeather.collectAsState().value
     val forecast = mainScreenViewModel.forecast.collectAsState().value
     val searchActive = remember {
         mutableStateOf(false)
     }
+    val searchedLocation = remember {
+        mutableStateOf("")
+    }
+    val scrollState = rememberScrollState()
+    val nestedScrollConnection = object : NestedScrollConnection {}
+    val maxScrollOffset = 150f
+    val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
+    val textSize by animateFloatAsState(
+        targetValue = lerP(28f, 22f, scrollProgress),
+        label = "TopAppBar Title Animation"
+    )
+    val vectorSize by animateFloatAsState(
+        targetValue = lerP(18f, 0f, scrollProgress),
+        label = "TopAppBar Location Icon Animation"
+    )
+    val dividerAlpha by animateFloatAsState(
+        targetValue = lerP(0f, 1f, scrollProgress),
+        label = "TopAppBar Elevation Animation"
+    )
+    val coordinates = mainScreenViewModel.coordinates.collectAsState().value
+    val searchQuery = remember {
+        mutableStateOf("")
+    }
 
     // Side Effects
-    LaunchedEffect(key1 = currentLocation) {
-        if (currentLocation != null && !searchActive.value) {
-            mainScreenViewModel.getCurrentWeather(
-                currentLocation.latitude, currentLocation.longitude
-            )
-            mainScreenViewModel.get5Day3HourWeatherForecast(
-                currentLocation.latitude, currentLocation.longitude
-            )
+    LaunchedEffect(key1 = locationPermission) {
+        if (locationPermission) {
+            locationViewModel.startLocationUpdates()
+        } else {
+            locationViewModel.stopLocationUpdates()
+        }
+    }
+    LaunchedEffect(key1 = location, key2 = searchedLocation.value) {
+        if (!searchActive.value) {
+            if (searchedLocation.value.isNotEmpty() && !searchedLocation.value.contains("null")) {
+                mainScreenViewModel.getCurrentWeather(
+                    searchedLocation.value.split(":")[0].toDouble(),
+                    searchedLocation.value.split(":")[1].toDouble()
+                )
+                mainScreenViewModel.get5Day3HourWeatherForecast(
+                    searchedLocation.value.split(":")[0].toDouble(),
+                    searchedLocation.value.split(":")[1].toDouble()
+                )
+            } else if (location != null) {
+                mainScreenViewModel.getCurrentWeather(
+                    location.latitude, location.longitude
+                )
+                mainScreenViewModel.get5Day3HourWeatherForecast(
+                    location.latitude, location.longitude
+                )
+            }
         }
     }
 
     // Ui
-    SetUp(permissionViewModel, locationViewModel)
+    SetUp(permissionViewModel)
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            if (currentWeather.loading == true || forecast.loading == true) {
+            if (weather.loading == true || forecast.loading == true) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,34 +164,14 @@ fun MainScreen(
                 ) {
                     CircularProgressIndicator()
                 }
-            } else if (currentWeather.exception != null || forecast.exception != null) {
+            } else if (weather.exception != null || forecast.exception != null) {
                 Snackbar {
                     Column {
-                        Text(text = currentWeather.exception.toString())
-                        Text(text = currentWeather.exception.toString())
+                        Text(text = weather.exception.toString())
+                        Text(text = weather.exception.toString())
                     }
                 }
-            } else if (currentWeather.data != null && forecast.data != null) {
-                val coordinates = mainScreenViewModel.coordinates.collectAsState().value
-                val scrollState = rememberScrollState()
-                val nestedScrollConnection = object : NestedScrollConnection {}
-                val searchQuery = remember {
-                    mutableStateOf("")
-                }
-                val maxScrollOffset = 150f
-                val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
-                val textSize by animateFloatAsState(
-                    targetValue = lerp(28f, 22f, scrollProgress),
-                    label = "TopAppBar Title Animation"
-                )
-                val vectorSize by animateFloatAsState(
-                    targetValue = lerp(18f, 0f, scrollProgress),
-                    label = "TopAppBar Location Icon Animation"
-                )
-                val dividerAlpha by animateFloatAsState(
-                    targetValue = lerp(0f, 1f, scrollProgress),
-                    label = "TopAppBar Elevation Animation"
-                )
+            } else if (weather.data != null && forecast.data != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -153,45 +185,86 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .clipToBounds(),
-                            verticalArrangement = Arrangement.Bottom,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-
-                        }
+                        Spacer(modifier = Modifier.height(100.dp))
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(80.dp)
                                 .clipToBounds(),
                             verticalArrangement = Arrangement.Bottom,
-                            horizontalAlignment = Alignment.Start
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Spacer(modifier = Modifier.height(30.dp))
-                            Text(
+                            Spacer(modifier = Modifier.height(25.dp))
+                            Row(
                                 modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(33.dp)
+                                    .padding(start = 15.dp, end = 15.dp),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .wrapContentWidth()
+                                        .height(33.dp),
+                                    verticalArrangement = Arrangement.Bottom,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Text(
+                                        modifier = Modifier,
+                                        text = "${weather.data!!.name}, ${weather.data!!.sys?.country}",
+                                        style = TextStyle(fontSize = textSize.sp)
+                                    )
+                                }
+                                Button(
+                                    modifier = Modifier
+                                        .size(33.dp)
+                                        .align(Alignment.CenterVertically)
+                                        .padding(top = 4.dp),
+                                    onClick = {
+                                        navController.navigate(WeatherScreens.SettingScreen.name)
+                                    },
+                                    shape = CircleShape,
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Image(
+                                        modifier = Modifier
+                                            .size(23.dp),
+                                        imageVector = Icons.Outlined.Settings,
+                                        contentDescription = "setting button icon",
+                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.tertiary)
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(12.dp)
                                     .padding(start = 15.dp),
-                                text = "${currentWeather.data!!.name}, ${currentWeather.data!!.sys?.country}",
-                                style = TextStyle(fontSize = textSize.sp)
-                            )
-                            Image(
-                                modifier = Modifier
-                                    .padding(start = 15.dp)
-                                    .size(vectorSize.dp),
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = "location icon",
-                                colorFilter = ColorFilter.tint(Color.Red),
-                                contentScale = ContentScale.Fit
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .size(12.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        modifier = Modifier
+                                            .size(vectorSize.dp),
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = "location icon",
+                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
                             HorizontalDivider(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                thickness = 0.5.dp,
+                                thickness = 1.dp,
                                 color = Color.Gray.copy(alpha = dividerAlpha)
                             )
                         }
@@ -205,43 +278,54 @@ fun MainScreen(
                             .wrapContentHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        MainContentWrapper(currentWeather.data!!, forecast.data!!)
+                        MainContent(weather.data!!, forecast.data!!)
                     }
                 }
-                LocationSearchBar(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    query = searchQuery.value,
-                    onQueryChange = {
-                        searchQuery.value = it
-                    },
-                    onSearch = {
-                        if (searchQuery.value.trim().isNotEmpty()) {
-                            if (searchQuery.value.toIntOrNull() != null) {
-                                mainScreenViewModel.getCoordinatesByZipCode(searchQuery.value)
-                            } else {
-                                mainScreenViewModel.getCoordinatesByLocationName(searchQuery.value)
-                            }
+            }
+            LocationSearchBar(
+                modifier = Modifier.align(Alignment.TopCenter),
+                query = searchQuery.value,
+                onQueryChange = {
+                    searchQuery.value = it
+                },
+                onSearch = {
+                    if (searchQuery.value.trim().isNotEmpty()) {
+                        if (searchQuery.value.toIntOrNull() != null) {
+                            mainScreenViewModel.getCoordinatesByZipCode(searchQuery.value)
+                        } else {
+                            mainScreenViewModel.getCoordinatesByLocationName(searchQuery.value)
                         }
-                    },
-                    active = searchActive.value,
-                    onActiveChange = {
-                        searchActive.value = it
-                    },
-                    onClear = {
-                        searchQuery.value = ""
-                        searchActive.value = false
-                        coordinates.data = null
-                    },
-                    searchResult = coordinates
-                )
+                    }
+                },
+                active = searchActive.value,
+                onActiveChange = {
+                    searchActive.value = it
+                },
+                onClear = {
+                    searchQuery.value = ""
+                    searchActive.value = false
+                    coordinates.data = null
+                },
+                searchResult = coordinates
+            ) {
+                if (it >= 0) {
+                    locationViewModel.stopLocationUpdates()
+                    searchActive.value = false
+                    searchedLocation.value =
+                        "${coordinates.data?.get(it)?.lat}:${coordinates.data?.get(it)?.lon}"
+                }
+            }
+            if (searchedLocation.value.isNotEmpty()) {
+                ResetButton(
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                ) {
+                    searchedLocation.value = ""
+                    locationViewModel.startLocationUpdates()
+                    searchQuery.value = ""
+                }
             }
         }
     }
-}
-
-@Composable
-fun MainContentWrapper(currentWeather: CurrentWeather, forecastData: WeatherData) {
-    MainContent(currentWeather = currentWeather, forecastData = forecastData)
 }
 
 @Composable
@@ -258,12 +342,11 @@ fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
     ForecastCard(forecastData = forecastData)
     Spacer(modifier = Modifier.height(10.dp))
     WeatherGrid(data = getWeatherGridData(currentWeather = currentWeather))
-    Spacer(modifier = Modifier.height(10.dp))
-    Spacer(modifier = Modifier.height(50.dp))
+    Spacer(modifier = Modifier.height(120.dp))
 }
 
 @Composable
-fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationViewModel) {
+fun SetUp(permissionViewModel: PermissionViewModel) {
     val context = LocalContext.current
     val permissionsToRequest = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -282,16 +365,6 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
 
     LaunchedEffect(key1 = Unit) {
         multiplePermissionResultLauncher.launch(permissionsToRequest)
-    }
-    LaunchedEffect(
-        key1 = locationViewModel.currentLocationFlow.collectAsState().value,
-        key2 = permissionViewModel.isLocationPermissionGranted.collectAsState().value
-    ) {
-        if (!dialogQueue.containsAll(permissionsToRequest.toList())) {
-            locationViewModel.startLocationUpdates()
-        } else {
-            locationViewModel.stopLocationUpdates()
-        }
     }
     dialogQueue.reversed().forEach { permission ->
         PermissionDialog(permissionTextProvider = when (permission) {
@@ -323,7 +396,7 @@ fun SetUp(permissionViewModel: PermissionViewModel, locationViewModel: LocationV
 }
 
 @Composable
-fun lerp(start: Float, end: Float, fraction: Float): Float {
+fun lerP(start: Float, end: Float, fraction: Float): Float {
     return start + fraction * (end - start)
 }
 
