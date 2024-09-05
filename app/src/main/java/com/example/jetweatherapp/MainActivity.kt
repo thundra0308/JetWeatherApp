@@ -37,13 +37,7 @@ fun WeatherApp() {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WeatherNavigation()
-            }
+            WeatherNavigation()
         }
     }
 }

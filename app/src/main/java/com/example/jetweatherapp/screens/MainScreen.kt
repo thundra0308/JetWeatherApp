@@ -86,13 +86,14 @@ fun MainScreen(
     navController: NavController,
     mainScreenViewModel: MainScreenViewModel,
     permissionViewModel: PermissionViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
 ) {
     // States
     val locationPermission = permissionViewModel.isLocationPermissionGranted.collectAsState().value
     val location = locationViewModel.currentLocationFlow.collectAsState().value
     val weather = mainScreenViewModel.currentWeather.collectAsState().value
     val forecast = mainScreenViewModel.forecast.collectAsState().value
+    val temperatureUnit = mainScreenViewModel.temperatureUnit.collectAsState().value
     val searchActive = remember {
         mutableStateOf(false)
     }
@@ -121,6 +122,9 @@ fun MainScreen(
     }
 
     // Side Effects
+    LaunchedEffect(key1 = Unit) {
+        mainScreenViewModel.getTemperatureUnit()
+    }
     LaunchedEffect(key1 = locationPermission) {
         if (locationPermission) {
             locationViewModel.startLocationUpdates()
@@ -128,23 +132,29 @@ fun MainScreen(
             locationViewModel.stopLocationUpdates()
         }
     }
-    LaunchedEffect(key1 = location, key2 = searchedLocation.value) {
+    LaunchedEffect(key1 = location, key2 = searchedLocation.value, key3 = temperatureUnit) {
         if (!searchActive.value) {
             if (searchedLocation.value.isNotEmpty() && !searchedLocation.value.contains("null")) {
                 mainScreenViewModel.getCurrentWeather(
                     searchedLocation.value.split(":")[0].toDouble(),
-                    searchedLocation.value.split(":")[1].toDouble()
+                    searchedLocation.value.split(":")[1].toDouble(),
+                    getTemperatureUnit(temperatureUnit)
                 )
                 mainScreenViewModel.get5Day3HourWeatherForecast(
                     searchedLocation.value.split(":")[0].toDouble(),
-                    searchedLocation.value.split(":")[1].toDouble()
+                    searchedLocation.value.split(":")[1].toDouble(),
+                    getTemperatureUnit(temperatureUnit)
                 )
             } else if (location != null) {
                 mainScreenViewModel.getCurrentWeather(
-                    location.latitude, location.longitude
+                    location.latitude,
+                    location.longitude,
+                    getTemperatureUnit(temperatureUnit)
                 )
                 mainScreenViewModel.get5Day3HourWeatherForecast(
-                    location.latitude, location.longitude
+                    location.latitude,
+                    location.longitude,
+                    getTemperatureUnit(temperatureUnit)
                 )
             }
         }
@@ -483,4 +493,13 @@ fun getWeatherGridData(currentWeather: CurrentWeather): List<List<String>> {
         )
     )
     return data
+}
+
+fun getTemperatureUnit(unit: String): String {
+    return when (unit) {
+        "Celsius (°C)" -> "metric"
+        "Kelvin (°k)" -> "standard"
+        "Fahrenheit (°F)" -> "imperial"
+        else -> "metric"
+    }
 }

@@ -8,11 +8,11 @@ import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val weatherApi: WeatherApi) {
 
-    suspend fun getCurrentWeather(latitude: Double, longitude: Double): DataOrException<CurrentWeather,Boolean,Exception> {
+    suspend fun getCurrentWeather(latitude: Double, longitude: Double, temperatureUnit: String): DataOrException<CurrentWeather,Boolean,Exception> {
         val weather = DataOrException<CurrentWeather,Boolean,Exception>()
         try {
             weather.loading = true
-            weather.data = weatherApi.getCurrentWeather(latitude,longitude)
+            weather.data = weatherApi.getCurrentWeather(latitude,longitude,temperatureUnit)
         } catch (e: Exception) {
             weather.exception = e
         } finally {
@@ -21,11 +21,11 @@ class WeatherRepository @Inject constructor(private val weatherApi: WeatherApi) 
         return weather
     }
 
-    suspend fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double): DataOrException<WeatherData,Boolean,Exception> {
+    suspend fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double, temperatureUnit: String): DataOrException<WeatherData,Boolean,Exception> {
         val forecast = DataOrException<WeatherData,Boolean,Exception>()
         try {
             forecast.loading = true
-            forecast.data = weatherApi.get5Day3HourWeatherForecast(latitude,longitude)
+            forecast.data = weatherApi.get5Day3HourWeatherForecast(latitude,longitude, temperatureUnit)
         } catch (e: Exception) {
             forecast.exception = e
         } finally {

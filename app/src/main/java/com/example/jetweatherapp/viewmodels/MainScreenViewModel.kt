@@ -1,5 +1,6 @@
 package com.example.jetweatherapp.viewmodels
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,6 +12,7 @@ import com.example.jetweatherapp.model.WeatherData
 import com.example.jetweatherapp.repository.GeocodingRepository
 import com.example.jetweatherapp.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainScreenViewModel @Inject constructor(private val repository: WeatherRepository, private val geocodingRepository: GeocodingRepository) : ViewModel() {
+class MainScreenViewModel @Inject constructor(@ApplicationContext private val context: Context, private val repository: WeatherRepository, private val geocodingRepository: GeocodingRepository) : ViewModel() {
 
     private val _currentWeather = MutableStateFlow(DataOrException<CurrentWeather, Boolean, Exception>())
     val currentWeather: StateFlow<DataOrException<CurrentWeather, Boolean, Exception>> = _currentWeather.asStateFlow()
@@ -29,10 +31,13 @@ class MainScreenViewModel @Inject constructor(private val repository: WeatherRep
     private val _coordinates = MutableStateFlow(DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>())
     val coordinates: StateFlow<DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>> = _coordinates.asStateFlow()
 
-    fun getCurrentWeather(latitude: Double, longitude: Double) {
+    private val _temperatureUnit = MutableStateFlow("metric")
+    val temperatureUnit: StateFlow<String> = _temperatureUnit.asStateFlow()
+
+    fun getCurrentWeather(latitude: Double, longitude: Double, temperatureUnit: String) {
         viewModelScope.launch {
             _currentWeather.emit(DataOrException(loading = true))
-            val result = repository.getCurrentWeather(latitude, longitude)
+            val result = repository.getCurrentWeather(latitude, longitude, temperatureUnit)
             _currentWeather.emit(result)
             if (result.data != null) {
                 _currentWeather.emit(result.copy(loading = false))
@@ -40,10 +45,10 @@ class MainScreenViewModel @Inject constructor(private val repository: WeatherRep
         }
     }
 
-    fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double) {
+    fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double, temperatureUnit: String) {
         viewModelScope.launch {
             _forecast.emit(DataOrException(loading = true))
-            val result = repository.get5Day3HourWeatherForecast(latitude, longitude)
+            val result = repository.get5Day3HourWeatherForecast(latitude, longitude, temperatureUnit)
             _forecast.emit(result)
             if (result.data != null) {
                 _forecast.emit(result.copy(loading = false))
@@ -71,6 +76,16 @@ class MainScreenViewModel @Inject constructor(private val repository: WeatherRep
             _coordinates.emit(result)
             if (result.data != null && result.data!!.isNotEmpty()) {
                 _coordinates.emit(result.copy(loading = false))
+            }
+        }
+    }
+
+    suspend fun getTemperatureUnit() {
+        viewModelScope.launch {
+            val sharedPref = context.getSharedPreferences("setting_pref", Context.MODE_PRIVATE)
+            val value = sharedPref.getString("temp_unit", "metric")
+            if (value != null) {
+                _temperatureUnit.emit(value)
             }
         }
     }
