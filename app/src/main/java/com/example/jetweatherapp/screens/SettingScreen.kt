@@ -1,7 +1,6 @@
 package com.example.jetweatherapp.screens
 
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,20 +19,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +48,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.jetweatherapp.components.TopBar
+import com.example.jetweatherapp.navigation.WeatherScreens
 import com.example.jetweatherapp.viewmodels.SettingScreenViewModel
 import kotlinx.coroutines.launch
 
@@ -71,42 +66,28 @@ fun SettingScreen(navController: NavController, settingScreenViewModel: SettingS
     ) {
         Scaffold(
             topBar = {
-                TopBar {
+                TopBar(
+                    text = "Setting"
+                ) {
                     navController.popBackStack()
                 }
             }
         ) {
-            SettingsContent(paddingValues = it, settingScreenViewModel = settingScreenViewModel)
+            SettingsContent(
+                paddingValues = it,
+                navController = navController,
+                settingScreenViewModel = settingScreenViewModel
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(
-    onClick: () -> Unit = {}
+fun SettingsContent(
+    paddingValues: PaddingValues,
+    navController: NavController,
+    settingScreenViewModel: SettingScreenViewModel
 ) {
-    TopAppBar(
-        title = {
-            Text(
-                text = "Settings",
-                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            )
-        },
-        navigationIcon = {
-            Icon(
-                modifier = Modifier
-                    .clickable { onClick() },
-                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = "Navigate Back Button"
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-    )
-}
-
-@Composable
-fun SettingsContent(paddingValues: PaddingValues, settingScreenViewModel: SettingScreenViewModel) {
     val nestedScrollConnection = object : NestedScrollConnection {}
     val verticalScrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
@@ -158,7 +139,11 @@ fun SettingsContent(paddingValues: PaddingValues, settingScreenViewModel: Settin
                     thickness = 1.dp,
                     color = Color.Gray
                 )
-                SettingRow() {
+                SettingRow(
+                    navigate = {
+                        navController.navigate(WeatherScreens.AboutScreen.name)
+                    }
+                ) {
                     Text(
                         text = "About",
                         style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
@@ -172,8 +157,9 @@ fun SettingsContent(paddingValues: PaddingValues, settingScreenViewModel: Settin
 @Composable
 fun SettingRow(
     dropdownItems: ArrayList<String> = arrayListOf(),
-    selectedDropdownMenuItem: String = "",
+    selectedDropdownMenuItem: String = "Celsius (°C)",
     onItemClick: (String) -> Unit = {},
+    navigate: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val isContextMenuVisible = rememberSaveable {
@@ -200,12 +186,16 @@ fun SettingRow(
             .pointerInput(true) {
                 detectTapGestures(
                     onPress = {
-                        val press = PressInteraction.Press(it)
-                        interactionSource.emit(press)
-                        tryAwaitRelease()
-                        interactionSource.emit(PressInteraction.Release(press))
-                        isContextMenuVisible.value = true
-                        pressOffset.value = DpOffset(it.x.toDp(), it.y.toDp())
+                        if (dropdownItems.isNotEmpty()) {
+                            val press = PressInteraction.Press(it)
+                            interactionSource.emit(press)
+                            tryAwaitRelease()
+                            interactionSource.emit(PressInteraction.Release(press))
+                            isContextMenuVisible.value = true
+                            pressOffset.value = DpOffset(it.x.toDp(), it.y.toDp())
+                        } else {
+                            navigate()
+                        }
                     }
                 )
             }
@@ -236,7 +226,11 @@ fun SettingRow(
                         text = {
                             Text(
                                 text = it,
-                                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Normal, color = if (selectedDropdownMenuItem==it) MaterialTheme.colorScheme.primary else Color.Gray)
+                                style = TextStyle(
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = if ((selectedDropdownMenuItem == it) || (selectedDropdownMenuItem.isEmpty() && it=="Celsius (°C)")) MaterialTheme.colorScheme.primary else Color.Gray
+                                )
                             )
                         }
                     )

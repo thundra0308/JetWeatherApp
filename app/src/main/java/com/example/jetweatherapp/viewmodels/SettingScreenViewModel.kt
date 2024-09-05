@@ -12,8 +12,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingScreenViewModel @Inject constructor(@ApplicationContext private val context: Context): ViewModel() {
-    private val _temperatureUnit = MutableStateFlow("")
+class SettingScreenViewModel @Inject constructor(@ApplicationContext private val context: Context) :
+    ViewModel() {
+    private val _temperatureUnit = MutableStateFlow("Celsius (°C)")
     val temperatureUnit: StateFlow<String> = _temperatureUnit.asStateFlow()
 
     suspend fun getFromSharedPreferences(key: String) {

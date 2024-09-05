@@ -6,6 +6,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.jetweatherapp.screens.AboutScreen
 import com.example.jetweatherapp.screens.MainScreen
 import com.example.jetweatherapp.screens.SettingScreen
 import com.example.jetweatherapp.screens.SplashScreen
@@ -26,6 +27,9 @@ fun WeatherNavigation() {
         }
         composable(route = WeatherScreens.SettingScreen.name) {
             SettingScreen(navController, hiltViewModel<SettingScreenViewModel>())
+        }
+        composable(route = WeatherScreens.AboutScreen.name) {
+            AboutScreen(navController)
         }
     }
 }

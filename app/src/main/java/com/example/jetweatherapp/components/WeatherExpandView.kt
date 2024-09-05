@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -89,7 +87,7 @@ fun WeatherExpandView(currentWeather: CurrentWeather) {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    if(!isExpanded.value) {
+                    if (!isExpanded.value) {
                         AnimatedContent(
                             targetState = textList[currentIndex.intValue],
                             transitionSpec = {
@@ -132,7 +130,10 @@ fun WeatherExpandView(currentWeather: CurrentWeather) {
                             ) {
                                 Text(
                                     text = detail,
-                                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium
+                                    ),
                                     modifier = Modifier.padding(start = 18.dp),
                                     textAlign = TextAlign.Center
                                 )

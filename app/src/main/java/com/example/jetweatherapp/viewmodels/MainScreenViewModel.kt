@@ -1,8 +1,6 @@
 package com.example.jetweatherapp.viewmodels
 
 import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jetweatherapp.data.DataOrException
@@ -20,16 +18,25 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainScreenViewModel @Inject constructor(@ApplicationContext private val context: Context, private val repository: WeatherRepository, private val geocodingRepository: GeocodingRepository) : ViewModel() {
+class MainScreenViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val repository: WeatherRepository,
+    private val geocodingRepository: GeocodingRepository
+) : ViewModel() {
 
-    private val _currentWeather = MutableStateFlow(DataOrException<CurrentWeather, Boolean, Exception>())
-    val currentWeather: StateFlow<DataOrException<CurrentWeather, Boolean, Exception>> = _currentWeather.asStateFlow()
+    private val _currentWeather =
+        MutableStateFlow(DataOrException<CurrentWeather, Boolean, Exception>())
+    val currentWeather: StateFlow<DataOrException<CurrentWeather, Boolean, Exception>> =
+        _currentWeather.asStateFlow()
 
     private val _forecast = MutableStateFlow(DataOrException<WeatherData, Boolean, Exception>())
-    val forecast: StateFlow<DataOrException<WeatherData, Boolean, Exception>> = _forecast.asStateFlow()
+    val forecast: StateFlow<DataOrException<WeatherData, Boolean, Exception>> =
+        _forecast.asStateFlow()
 
-    private val _coordinates = MutableStateFlow(DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>())
-    val coordinates: StateFlow<DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>> = _coordinates.asStateFlow()
+    private val _coordinates =
+        MutableStateFlow(DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>())
+    val coordinates: StateFlow<DataOrException<ArrayList<LocationDataItem>, Boolean, Exception>> =
+        _coordinates.asStateFlow()
 
     private val _temperatureUnit = MutableStateFlow("metric")
     val temperatureUnit: StateFlow<String> = _temperatureUnit.asStateFlow()
@@ -48,7 +55,8 @@ class MainScreenViewModel @Inject constructor(@ApplicationContext private val co
     fun get5Day3HourWeatherForecast(latitude: Double, longitude: Double, temperatureUnit: String) {
         viewModelScope.launch {
             _forecast.emit(DataOrException(loading = true))
-            val result = repository.get5Day3HourWeatherForecast(latitude, longitude, temperatureUnit)
+            val result =
+                repository.get5Day3HourWeatherForecast(latitude, longitude, temperatureUnit)
             _forecast.emit(result)
             if (result.data != null) {
                 _forecast.emit(result.copy(loading = false))
