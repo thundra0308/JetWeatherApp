@@ -75,6 +75,9 @@ dependencies {
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
+    // Splash Screen
+    implementation(libs.androidx.core.splashscreen)
+
     // Hilt and Dagger
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
