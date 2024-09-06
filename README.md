@@ -30,11 +30,17 @@ A Weather Application for Android OS Devices
 
 ## BUILD INFORMATION
 
-- Build with Jetpack Compose
+- Build Tool : Gradle with Kotlin DSL for Writing Gradle Scripts
+
+- KSP (kotlin Symbol Processing Tool) API for Compiler Plugins
+
+- Programming Language : Kotlin <img src="https://github.com/user-attachments/assets/dd623fb4-7350-4f8e-885d-adf71bdcc370" style="width: 2%;margin:16px;" />
+
+- Build with Jetpack Compose <img src="https://github.com/user-attachments/assets/b17568b8-4227-42c6-a110-3ab7442dacf8" style="width:2%;margin:16px;"/>
 
 - MVVM Architecture
 
-- OpenWeatherMap API
+- OpenWeatherMap API <img src="https://github.com/user-attachments/assets/555fd632-5cab-4809-859c-4317ea114e08" style="width: 2%;margin:16px;" />
 
 - Light and Dark UI
 
