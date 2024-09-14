@@ -43,7 +43,7 @@ fun ForecastRow(forecast: WeatherDataItem) {
             Text(
                 modifier = Modifier
                     .weight(3.5f),
-                text = formatteDate(forecast.dt_txt?.split(" ")?.get(0)!!),
+                text = formatDate(forecast.dt_txt?.split(" ")?.get(0)!!),
                 style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             )
             Image(
@@ -65,7 +65,7 @@ fun ForecastRow(forecast: WeatherDataItem) {
     }
 }
 
-fun formatteDate(dateString: String): String {
+fun formatDate(dateString: String): String {
     val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val date = LocalDate.parse(dateString, inputFormatter)
     val today = LocalDate.now()

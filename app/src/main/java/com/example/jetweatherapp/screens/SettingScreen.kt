@@ -26,6 +26,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,27 +59,20 @@ fun SettingScreen(navController: NavController, settingScreenViewModel: SettingS
     LaunchedEffect(key1 = Unit) {
         settingScreenViewModel.getFromSharedPreferences("temp_unit")
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Scaffold(
-            topBar = {
-                TopBar(
-                    text = "Setting"
-                ) {
-                    navController.popBackStack()
-                }
+    Scaffold(
+        topBar = {
+            TopBar(
+                text = "Setting"
+            ) {
+                navController.popBackStack()
             }
-        ) {
-            SettingsContent(
-                paddingValues = it,
-                navController = navController,
-                settingScreenViewModel = settingScreenViewModel
-            )
         }
+    ) {
+        SettingsContent(
+            paddingValues = it,
+            navController = navController,
+            settingScreenViewModel = settingScreenViewModel
+        )
     }
 }
 
@@ -92,62 +86,66 @@ fun SettingsContent(
     val verticalScrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val savedValue = settingScreenViewModel.temperatureUnit.collectAsState()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = paddingValues.calculateTopPadding())
-            .nestedScroll(nestedScrollConnection)
-            .verticalScroll(verticalScrollState),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(start = 15.dp, end = 15.dp),
-            shape = RoundedCornerShape(15.dp),
-            elevation = CardDefaults.cardElevation(0.dp),
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+                .nestedScroll(nestedScrollConnection)
+                .verticalScroll(verticalScrollState),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            Card(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(start = 15.dp, end = 15.dp),
+                shape = RoundedCornerShape(15.dp),
+                elevation = CardDefaults.cardElevation(0.dp),
             ) {
-                SettingRow(
-                    dropdownItems = arrayListOf("Celsius (°C)", "Kelvin (°k)", "Fahrenheit (°F)"),
-                    selectedDropdownMenuItem = savedValue.value,
-                    onItemClick = {
-                        scope.launch {
-                            settingScreenViewModel.saveToSharedPreferences("temp_unit", it)
-                            settingScreenViewModel.getFromSharedPreferences("temp_unit")
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SettingRow(
+                        dropdownItems = arrayListOf("Celsius (°C)", "Kelvin (°k)", "Fahrenheit (°F)"),
+                        selectedDropdownMenuItem = savedValue.value,
+                        onItemClick = {
+                            scope.launch {
+                                settingScreenViewModel.saveToSharedPreferences("temp_unit", it)
+                                settingScreenViewModel.getFromSharedPreferences("temp_unit")
+                            }
                         }
+                    ) {
+                        Text(
+                            text = "Temperature Unit",
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                        )
+                        Text(
+                            text = savedValue.value,
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Normal)
+                        )
                     }
-                ) {
-                    Text(
-                        text = "Temperature Unit",
-                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = Color.Gray
                     )
-                    Text(
-                        text = savedValue.value,
-                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Normal)
-                    )
-                }
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = Color.Gray
-                )
-                SettingRow(
-                    navigate = {
-                        navController.navigate(WeatherScreens.AboutScreen.name)
+                    SettingRow(
+                        navigate = {
+                            navController.navigate(WeatherScreens.AboutScreen.name)
+                        }
+                    ) {
+                        Text(
+                            text = "About",
+                            style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                        )
                     }
-                ) {
-                    Text(
-                        text = "About",
-                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                    )
                 }
             }
         }

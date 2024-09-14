@@ -53,7 +53,7 @@ fun LocationSearchBar(
         } else {
             modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp, end = 25.dp)
+                .padding(start = 15.dp, end = 15.dp)
         },
         shadowElevation = 0.dp,
         shape = RoundedCornerShape(15.dp),

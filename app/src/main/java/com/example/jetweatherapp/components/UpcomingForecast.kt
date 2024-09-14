@@ -24,11 +24,11 @@ import coil.compose.rememberAsyncImagePainter
 fun UpcomingForecast(
     iconId: String = "10d",
     time: String = "20:00",
-    temperature: String = "18°"
+    temperature: String = "18"
 ) {
     Column(
         modifier = Modifier
-            .height(80.dp),
+            .height(100.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -36,7 +36,7 @@ fun UpcomingForecast(
         Text(
             modifier = Modifier.padding(top = 0.dp),
             text = time,
-            style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Bold)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Image(

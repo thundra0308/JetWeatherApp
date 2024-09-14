@@ -50,7 +50,7 @@ fun WeatherExpandView(currentWeather: CurrentWeather) {
         label = "Arrow Rotation"
     )
     val cardHeight by animateDpAsState(
-        targetValue = if (isExpanded.value) 100.dp else 50.dp,
+        targetValue = if (isExpanded.value) 100.dp else 42.dp,
         label = "Card Expansion"
     )
     val currentIndex = remember { mutableIntStateOf(0) }

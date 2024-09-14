@@ -26,7 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -105,11 +105,11 @@ fun MainScreen(
     val maxScrollOffset = 150f
     val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
     val textSize by animateFloatAsState(
-        targetValue = lerP(28f, 22f, scrollProgress),
+        targetValue = lerP(24f, 17f, scrollProgress),
         label = "TopAppBar Title Animation"
     )
-    val vectorSize by animateFloatAsState(
-        targetValue = lerP(18f, 0f, scrollProgress),
+    val vectorAlpha by animateFloatAsState(
+        targetValue = lerP(1f, 0f, scrollProgress),
         label = "TopAppBar Location Icon Animation"
     )
     val dividerAlpha by animateFloatAsState(
@@ -191,7 +191,7 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp),
+                            .height(160.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -204,7 +204,6 @@ fun MainScreen(
                             verticalArrangement = Arrangement.Bottom,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Spacer(modifier = Modifier.height(25.dp))
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -216,7 +215,8 @@ fun MainScreen(
                                 Column(
                                     modifier = Modifier
                                         .wrapContentWidth()
-                                        .height(33.dp),
+                                        .height(33.dp)
+                                        .padding(end = 0.dp),
                                     verticalArrangement = Arrangement.Bottom,
                                     horizontalAlignment = Alignment.Start
                                 ) {
@@ -228,7 +228,7 @@ fun MainScreen(
                                 }
                                 Button(
                                     modifier = Modifier
-                                        .size(33.dp)
+                                        .size(25.dp)
                                         .align(Alignment.CenterVertically)
                                         .padding(top = 4.dp),
                                     onClick = {
@@ -241,9 +241,10 @@ fun MainScreen(
                                     Image(
                                         modifier = Modifier
                                             .size(23.dp),
-                                        imageVector = Icons.Outlined.Settings,
+                                        contentScale = ContentScale.Fit,
+                                        imageVector = Icons.Default.Settings,
                                         contentDescription = "setting button icon",
-                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.tertiary)
+                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                                     )
                                 }
                             }
@@ -262,10 +263,14 @@ fun MainScreen(
                                 ) {
                                     Image(
                                         modifier = Modifier
-                                            .size(vectorSize.dp),
+                                            .size(22.dp),
                                         imageVector = Icons.Default.LocationOn,
                                         contentDescription = "location icon",
-                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                                        colorFilter = ColorFilter.tint(
+                                            MaterialTheme.colorScheme.primary.copy(
+                                                alpha = vectorAlpha
+                                            )
+                                        ),
                                         contentScale = ContentScale.Fit
                                     )
                                 }
@@ -293,7 +298,9 @@ fun MainScreen(
                 }
             }
             LocationSearchBar(
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 5.dp),
                 query = searchQuery.value,
                 onQueryChange = {
                     searchQuery.value = it
@@ -342,7 +349,7 @@ fun MainScreen(
 fun MainContent(currentWeather: CurrentWeather, forecastData: WeatherData) {
     TemperatureTextMain(currentWeather)
     WeatherDescription(currentWeather = currentWeather)
-    Spacer(modifier = Modifier.height(70.dp))
+    Spacer(modifier = Modifier.height(50.dp))
     WeatherExpandView(currentWeather = currentWeather)
     Spacer(modifier = Modifier.height(10.dp))
     HorizontalForecastListOf24Hours(forecastData = forecastData)
