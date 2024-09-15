@@ -36,63 +36,55 @@ fun UpcomingForecast(
     time: String = "20:00",
     temperature: String = "18"
 ) {
-    Card(
+    Column(
         modifier = Modifier
-            .size(120.dp)
-            .background(color = Color.Transparent),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(0.dp),
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        val painter =
+            rememberAsyncImagePainter("https://openweathermap.org/img/wn/$iconId@2x.png")
+        Box(
             modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .weight(1f)
+                .shadow(elevation = 0.dp)
         ) {
-            val painter =
-                rememberAsyncImagePainter("https://openweathermap.org/img/wn/$iconId@2x.png")
-            Box(
+            Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .shadow(elevation = 0.dp)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    text = time,
-                    style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-                )
-            }
-            Box(
+                    .align(Alignment.Center),
+                text = time,
+                style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .weight(2f)
+                .shadow(elevation = 0.dp)
+                .background(shape = RoundedCornerShape(15.dp), color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = "Loaded Image",
                 modifier = Modifier
-                    .size(60.dp)
-                    .weight(2f)
-                    .shadow(elevation = 0.dp)
-                    .background(shape = RoundedCornerShape(15.dp), color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Image(
-                    painter = painter,
-                    contentDescription = "Loaded Image",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.Center),
-                    contentScale = ContentScale.Fit
-                )
-            }
-            Box(
+                    .size(40.dp)
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Fit
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .shadow(elevation = 0.dp)
+        ) {
+            Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .shadow(elevation = 0.dp)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    text = "$temperature°",
-                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                )
-            }
+                    .align(Alignment.Center),
+                text = "$temperature°",
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            )
         }
     }
 }

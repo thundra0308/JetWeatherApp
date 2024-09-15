@@ -67,6 +67,7 @@ fun WeatherExpandView(currentWeather: CurrentWeather) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)
             .height(cardHeight),
         shape = RoundedCornerShape(20.dp),
     ) {

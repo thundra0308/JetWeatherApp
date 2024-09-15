@@ -17,7 +17,7 @@ import com.example.jetweatherapp.model.CurrentWeather
 @Composable
 fun TemperatureTextMain(currentWeather: CurrentWeather) {
     TemperatureText(
-        modifier = Modifier.padding(top = 20.dp), style1 = TextStyle(
+        modifier = Modifier.padding(top = 20.dp).padding(start = 15.dp, end = 15.dp), style1 = TextStyle(
             fontSize = 100.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Default
         ), style2 = TextStyle(
             fontSize = 80.sp, fontWeight = FontWeight.Bold

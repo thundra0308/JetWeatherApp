@@ -32,7 +32,8 @@ fun WeatherViewPager(pagerData: List<String>) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp),
+            .padding(start = 15.dp, end = 15.dp)
+            .height(105.dp),
         shape = RoundedCornerShape(20.dp),
     ) {
         ConstraintLayout(
@@ -47,6 +48,7 @@ fun WeatherViewPager(pagerData: List<String>) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
+                    .padding(bottom = 10.dp)
             ) { page ->
                 PageContent(page = page, pagerData[page])
             }

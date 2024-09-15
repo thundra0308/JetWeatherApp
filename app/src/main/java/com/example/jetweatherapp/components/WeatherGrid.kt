@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun WeatherGrid(data: List<List<String>>) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
