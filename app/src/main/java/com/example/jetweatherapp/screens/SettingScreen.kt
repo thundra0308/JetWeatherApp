@@ -132,7 +132,7 @@ fun SettingsContent(
                         )
                     }
                     HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
                         thickness = 1.dp,
                         color = Color.Gray
                     )

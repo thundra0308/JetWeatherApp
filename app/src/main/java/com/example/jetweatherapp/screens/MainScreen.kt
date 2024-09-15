@@ -105,7 +105,7 @@ fun MainScreen(
     val maxScrollOffset = 150f
     val scrollProgress = (scrollState.value / maxScrollOffset).coerceIn(0f, 1f)
     val textSize by animateFloatAsState(
-        targetValue = lerP(24f, 17f, scrollProgress),
+        targetValue = lerP(25f, 20f, scrollProgress),
         label = "TopAppBar Title Animation"
     )
     val vectorAlpha by animateFloatAsState(

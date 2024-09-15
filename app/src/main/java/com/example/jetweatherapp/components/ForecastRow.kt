@@ -28,7 +28,7 @@ import java.time.format.TextStyle as TimeTextStyle
 @Composable
 fun ForecastRow(forecast: WeatherDataItem) {
     val painter =
-        rememberAsyncImagePainter("https://openweathermap.org/img/wn/${forecast.weather?.get(0)?.icon}.png")
+        rememberAsyncImagePainter("https://openweathermap.org/img/wn/${forecast.weather?.get(0)?.icon}@2x.png")
     Box(
         modifier = Modifier
             .fillMaxWidth()

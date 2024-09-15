@@ -132,7 +132,7 @@ fun WeatherExpandView(currentWeather: CurrentWeather) {
                                     text = detail,
                                     style = TextStyle(
                                         fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.SemiBold
                                     ),
                                     modifier = Modifier.padding(start = 18.dp),
                                     textAlign = TextAlign.Center

@@ -52,7 +52,7 @@ fun AboutContent(paddingValues: PaddingValues) {
                 text = buildAnnotatedString {
                     append("Weather Application\nDeveloped by ")
                     withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)) {
-                        append("Suryansh Singh")
+                        append("Esoteric Engineer")
                     }
                 },
                 textAlign = TextAlign.Center
