@@ -15,15 +15,14 @@ A Weather Application for Android OS Devices
 
 <br>
 
-<img src="https://github.com/user-attachments/assets/4c8adf81-20eb-45f2-a7a2-97198a47b8b0" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/e7a85353-b99a-4ced-860f-70450685b399" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/2210e348-53cd-4b00-be8d-f832004890b1" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/0d269344-e9a4-4c36-8f71-adb234fcbdcd" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/c2133d97-bf63-4b4a-8700-c1671390ae5b" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/f0bcb3e7-81d1-489f-b79e-f886d90483c7" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/ff713c30-a3aa-4eda-b11a-7b827098746c" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/41602017-63b2-4e99-97ef-49c6f2021be8" style="width: 31%;margin:16px;" />
-<img src="https://github.com/user-attachments/assets/fcc39145-70ea-4add-bd77-68ce38cc4ac3" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/54eddc1a-be87-4ab2-b95e-60be4391b878" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/7ddf7c12-d75f-44dc-b7a4-078f0c8d18b8" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/dde081fe-3e2b-4bc3-b0a8-a7cddd1cc82f" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/eb9b8858-3463-4907-beb8-371edcbe6743" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/d1f73db6-0ea2-4965-9aef-fe3f1f76adad" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/89d3385c-6f6e-4491-91ef-6ff77d3deceb" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/da2ca093-26c2-40f2-afe8-8f6cad388b66" style="width: 31%;margin:16px;" />
+<img src="https://github.com/user-attachments/assets/c130d4e8-5dd9-43aa-9aad-f7d4e43a6491" style="width: 31%;margin:16px;" />
 <img src="https://github.com/user-attachments/assets/9c555d8a-c6ad-444f-96ae-34de0e955193" style="width: 31%;margin:16px;" />
 
 <br>
